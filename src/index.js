@@ -25,3 +25,4 @@ connectDB().then(() => {
 }).catch((err) => {
     console.error("Error al conectar a la base de datos:", err);
 });
+
