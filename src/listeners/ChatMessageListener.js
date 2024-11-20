@@ -1,12 +1,12 @@
-import { ChatMessage } from '../models/ChatMessage.js';
+import { Mensaje } from "../models/Mensaje.js";
 
 class ChatMessageListener {
     static async handle(event) {
         try {
-            const newMessage = new ChatMessage({
-                userId: event.userId,
-                message: event.message,
-                createdAt: event.createdAt,
+            const newMessage = new Mensaje({
+                usuario: event.userId,
+                mensaje: event.message,
+                canal: event.channel || "general",
             });
 
             await newMessage.save();
@@ -18,5 +18,3 @@ class ChatMessageListener {
 }
 
 export default ChatMessageListener;
-
-

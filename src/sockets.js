@@ -1,33 +1,22 @@
-import { registerEvents } from './services/EventServiceProvider.js';
-import { verifyToken } from './services/auth.js'; // Función para verificar tokens y roles
+import { Mensaje } from "../models/Mensaje.js";
 
 export default (io) => {
-    // Registrar los eventos
-    registerEvents(io);
-
     io.on("connection", (socket) => {
         console.log("A user connected:", socket.id);
-        socket.on("join-channel", async (channel, token) => {
+
+        socket.on("client:sendChatMessage", async (data) => {
             try {
-                const user = await verifyToken(token);
+                // Guardar el mensaje en la base de datos
+                const newMessage = new Mensaje(data);
+                await newMessage.save();
 
-                if (channel === "admin-channel" && user.role !== "admin") {
-                    socket.emit("error", "No tienes permiso para unirte a este canal.");
-                    return;
-                }
-                socket.join(channel);
-                socket.emit("joined", `Te has unido al canal: ${channel}`);
-                console.log(`Usuario ${user.name} se unió al canal ${channel}`);
+                // Emitir evento a todos los usuarios
+                io.emit("server:broadcastMessage", newMessage);
+                console.log("Message broadcasted:", newMessage);
             } catch (err) {
-                console.error("Error al unirse al canal:", err.message);
-                socket.emit("error", "Error de autenticación.");
+                console.error("Error processing message:", err.message);
+                socket.emit("error", "Error al enviar el mensaje.");
             }
-        });
-
-        socket.on("client:sendMessage", (data) => {
-            console.log("Message received from client:", data);
-
-            io.emit("chat:messageSent", data);
         });
 
         socket.on("disconnect", () => {
