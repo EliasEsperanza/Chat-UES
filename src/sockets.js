@@ -1,4 +1,4 @@
-import { Mensaje } from "../models/Mensaje.js";
+import { Mensaje } from "./models/Mensaje.js";
 
 export default (io) => {
     io.on("connection", (socket) => {
