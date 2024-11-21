@@ -9,9 +9,15 @@ export default (io) => {
         emitMensajes();
 
         socket.on("client:nuevoMensaje", async (data) => {
-            const newMensaje = new Mensaje(data);
-            const savedMensaje = await newMensaje.save();
-            io.emit("server:nuevoMensaje", savedMensaje); 
+            try {
+                const newMensaje = new Mensaje(data);
+                const savedMensaje = await newMensaje.save();
+                io.emit("server:nuevoMensaje", savedMensaje); 
+            } catch (error) {
+                console.error("Error al guardar el mensaje:", error);
+                socket.emit("server:error", { message: "No se pudo guardar el mensaje." });
+            }
         });
+        
     });
 };
