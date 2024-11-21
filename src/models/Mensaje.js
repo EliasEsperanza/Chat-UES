@@ -7,10 +7,10 @@ const MensajeSchema = new Schema({
     },
     usuario: {
         type: Schema.Types.ObjectId,
-        ref: "id_usuario",
+        ref: "Usuario",
     }
 },{
     timestamps: true
 })
 
-export const Mensaje = model("Mensaje", MensajeSchema);
+export const Mensaje = model("Mensaje", MensajeSchema); 
