@@ -1,27 +1,25 @@
 import { Schema, model } from "mongoose";
 
-const MensajeSchema = new Schema(
-    {
-        chatId: {
-            type: String,
-            required: true,
-        },
-        text: {
-            type: String,
-            required: true,
-        },
-        sender: {
-            type: String,
-            default: "unknown",
-        },
-        time: {
-            type: String,
-            default: () => new Date().toLocaleTimeString(),
-        },
+const MensajeSchema = new Schema({
+    chatId: {
+        type: String,
+        required: true,
     },
-    {
-        timestamps: true,
-    }
-);
+    text: {
+        type: String,
+        required: true,
+    },
+    sender: {
+        type: String,
+        required: true,
+    },
+    time: {
+        type: String,
+        required: true,
+    },
+}, {
+    timestamps: true,
+});
 
 export const Mensaje = model("Mensaje", MensajeSchema);
+
