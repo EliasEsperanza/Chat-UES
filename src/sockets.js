@@ -26,17 +26,23 @@ export default (io) => {
         });
 
         // Guardar y emitir un nuevo mensaje
-        socket.on("client:nuevoMensaje", async (data) => {
-            console.log("Datos recibidos:", data); // Imprime los datos recibidos desde el cliente
-        
+        socket.on("client:nuevoMensaje", async (rawData) => {
             try {
+                // Si los datos llegan como cadena, convertirlos a JSON
+                const data = typeof rawData === "string" ? JSON.parse(rawData) : rawData;
+                
+                console.log("Datos procesados:", data);
+        
                 // Validar campos requeridos
-                const { chatId, text, sender, time } = data;
-                if (!chatId || !text || !sender || !time) {
-                    throw new Error("Faltan campos requeridos.");
+                const requiredFields = ["chatId", "text", "sender", "time"];
+                const missingFields = requiredFields.filter((field) => !data[field]);
+        
+                if (missingFields.length > 0) {
+                    throw new Error(`Faltan campos requeridos: ${missingFields.join(", ")}`);
                 }
         
                 // Validar tipos de datos
+                const { chatId, text, sender, time } = data;
                 if (
                     typeof chatId !== "string" ||
                     typeof text !== "string" ||
@@ -46,7 +52,6 @@ export default (io) => {
                     throw new Error("Tipos de datos inválidos.");
                 }
         
-                // Imprimir detalles de los datos antes de crear el modelo
                 console.log("Datos a guardar:", {
                     chatId,
                     text,
@@ -54,7 +59,7 @@ export default (io) => {
                     time,
                 });
         
-                // Crear un nuevo mensaje
+                // Guardar el mensaje en la base de datos
                 const newMensaje = new Mensaje({
                     chatId,
                     text,
@@ -62,17 +67,15 @@ export default (io) => {
                     time,
                 });
         
-                // Guardar mensaje en la base de datos
                 const savedMensaje = await newMensaje.save();
                 console.log("Mensaje guardado:", savedMensaje);
         
-                // Emitir mensaje a los clientes conectados
+                // Emitir el mensaje guardado a los clientes
                 io.emit("server:nuevoMensaje", savedMensaje);
             } catch (error) {
                 console.error("Error al guardar mensaje:", error.message);
             }
         });
-        
         
         
     });
