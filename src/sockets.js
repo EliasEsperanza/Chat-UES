@@ -26,25 +26,30 @@ export default (io) => {
         });
 
         // Guardar y emitir un nuevo mensaje
-    socket.on("client:nuevoMensaje", async (data) => {
-        try {
-            if (typeof data !== "object" || !data.chatId || !data.text) {
-                throw new Error("Datos de mensaje inválidos.");
+        socket.on("client:nuevoMensaje", async (data) => {
+            console.log("Datos recibidos:", data); // Log para inspeccionar los datos recibidos
+        
+            try {
+                // Validación de los datos
+                if (typeof data !== "object" || !data.chatId || !data.text) {
+                    throw new Error("Datos de mensaje inválidos.");
+                }
+        
+                // Creación del mensaje
+                const newMensaje = new Mensaje({
+                    chatId: data.chatId,
+                    text: data.text,
+                    sender: data.sender || "unknown",
+                    time: data.time || new Date().toLocaleTimeString(),
+                });
+        
+                // Guardar en la base de datos
+                const savedMensaje = await newMensaje.save();
+                io.emit("server:nuevoMensaje", savedMensaje);
+            } catch (error) {
+                console.error("Error al guardar mensaje:", error.message);
             }
-
-            const newMensaje = new Mensaje({
-                chatId: data.chatId,
-                text: data.text,
-                sender: data.sender || "unknown",
-                time: data.time || new Date().toLocaleTimeString(),
-            });
-
-            const savedMensaje = await newMensaje.save();
-            io.emit("server:nuevoMensaje", savedMensaje);
-        } catch (error) {
-            console.error("Error al guardar mensaje:", error.message);
-        }
-    });
-
+        });
+        
     });
 };
