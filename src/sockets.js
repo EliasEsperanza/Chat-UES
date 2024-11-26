@@ -76,7 +76,35 @@ export default (io) => {
                 console.error("Error al guardar mensaje:", error.message);
             }
         });
-        
+
+        socket.on("client:requestUserChats", async (userId) => {
+            try {
+                if (!userId) {
+                    throw new Error("El ID de usuario es obligatorio.");
+                }
+
+                // Obtener todos los mensajes donde el usuario esté involucrado
+                const mensajes = await Mensaje.find({
+                    $or: [{ sender: userId }, { receiver: userId }]
+                });
+
+                // Obtener los IDs de los chats únicos involucrados con ese usuario
+                const chatIds = [...new Set(mensajes.map((mensaje) => mensaje.chatId))];
+
+                // Obtener los detalles de los chats (nombre y rol del usuario)
+                const chatList = chatIds.map((id) => ({
+                    id,
+                    name: `Chat ${id}`, 
+                    role: "Usuario",  
+                }));
+
+                // Emitir la lista de chats encontrados
+                socket.emit("server:userChatsList", chatList);
+            } catch (error) {
+                console.error("Error al obtener chats del usuario:", error.message);
+                socket.emit("server:error", { message: error.message });
+            }
+        });
         
     });
 };
