@@ -72,7 +72,7 @@ export default (io) => {
                 console.log("Mensaje guardado:", savedMensaje);
         
                 // Emitir el mensaje guardado a los clientes
-                socket.to(data.chatId).emit("server:nuevoMensaje", savedMensaje);
+                io.emit("server:nuevoMensaje", savedMensaje);
             } catch (error) {
                 console.error("Error al guardar mensaje:", error.message);
             }
