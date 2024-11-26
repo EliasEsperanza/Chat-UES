@@ -18,12 +18,13 @@ export default (io) => {
         // Enviar mensajes de un chat específico
         socket.on("client:requestMessages", async ({ chatId }) => {
             try {
-                const messages = await Mensaje.find({ chatId });
+                const messages = await Mensaje.find({ chatId }); // Obtener mensajes históricos
                 socket.emit("server:chatMessages", messages);
             } catch (error) {
                 console.error("Error al obtener mensajes:", error);
             }
         });
+
 
         // Guardar y emitir un nuevo mensaje
         socket.on("client:nuevoMensaje", async (rawData) => {
@@ -71,7 +72,7 @@ export default (io) => {
                 console.log("Mensaje guardado:", savedMensaje);
         
                 // Emitir el mensaje guardado a los clientes
-                io.emit("server:nuevoMensaje", savedMensaje);
+                socket.to(data.chatId).emit("server:nuevoMensaje", savedMensaje);
             } catch (error) {
                 console.error("Error al guardar mensaje:", error.message);
             }
