@@ -83,24 +83,33 @@ export default (io) => {
                 if (!userId) {
                     throw new Error("El ID de usuario es obligatorio.");
                 }
-
-                // Obtener todos los mensajes donde el usuario esté involucrado
+        
+                // Obtener todos los mensajes donde el usuario esté involucrado como remitente o receptor
                 const mensajes = await Mensaje.find({
                     $or: [{ sender: userId }, { receiver: userId }]
                 });
-
-                // Obtener los IDs de los chats únicos involucrados con ese usuario
+        
+                if (mensajes.length === 0) {
+                    return socket.emit("server:userChatsList", { chats: [], messages: [] });
+                }
+        
+                // Obtener los IDs únicos de los chats involucrados
                 const chatIds = [...new Set(mensajes.map((mensaje) => mensaje.chatId))];
-
-                // Obtener los detalles de los chats (nombre y rol del usuario)
-                const chatList = chatIds.map((id) => ({
-                    id,
-                    name: `Chat ${id}`, 
-                    role: "Usuario",  
-                }));
-
-                // Emitir la lista de chats encontrados
-                socket.emit("server:userChatsList", chatList);
+        
+                // Crear una lista de chats con los mensajes asociados
+                const chatsWithMessages = chatIds.map((chatId) => {
+                    const chatMessages = mensajes.filter((mensaje) => mensaje.chatId === chatId);
+        
+                    return {
+                        id: chatId,
+                        name: `Chat ${chatId}`, 
+                        role: "Usuario", 
+                        messages: chatMessages, 
+                    };
+                });
+        
+                // Emitir los chats junto con sus mensajes
+                socket.emit("server:userChatsList", chatsWithMessages);
             } catch (error) {
                 console.error("Error al obtener chats del usuario:", error.message);
                 socket.emit("server:error", { message: error.message });

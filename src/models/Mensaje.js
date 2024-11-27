@@ -1,19 +1,17 @@
 import { Schema, model } from "mongoose";
 
 const MensajeSchema = new Schema({
-    chatId: {
-        type: String,
+    senderId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
         required: true,
     },
-    text: {
-        type: String,
+    receiverId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
         required: true,
     },
-    sender: {
-        type: String,
-        required: true,
-    },
-    time: {
+    message: {
         type: String,
         required: true,
     },
@@ -22,4 +20,6 @@ const MensajeSchema = new Schema({
 });
 
 export const Mensaje = model("Mensaje", MensajeSchema);
+
+export default Mensaje;
 
